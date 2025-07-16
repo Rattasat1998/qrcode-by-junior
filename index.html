@@ -35,45 +35,44 @@
 
     <p class="text-xs text-gray-500">QR นี้จะนำผู้ใช้ไปยัง Store ตามอุปกรณ์</p>
   </div>
+<!-- JS: โหลด QRCode.js จาก jsDelivr แทน -->
+<script>
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+  script.onload = function () {
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = false;
+    btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
+    btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+    btn.textContent = 'สร้าง QR Code';
 
-  <!-- QRCode.js แบบ manual เพื่อควบคุม onload -->
-  <script>
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js';
-    script.onload = function () {
-      const btn = document.getElementById('generateBtn');
-      btn.disabled = false;
-      btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
-      btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
-      btn.textContent = 'สร้าง QR Code';
+    btn.addEventListener('click', () => {
+      const android = document.getElementById('androidLink').value.trim();
+      const ios = document.getElementById('iosLink').value.trim();
+      const qrContainer = document.getElementById('qrcode');
 
-      btn.addEventListener('click', () => {
-        const android = document.getElementById('androidLink').value.trim();
-        const ios = document.getElementById('iosLink').value.trim();
-        const qrContainer = document.getElementById('qrcode');
+      if (!android && !ios) {
+        alert("กรุณาใส่ลิงก์อย่างน้อย 1 ระบบ");
+        return;
+      }
 
-        if (!android && !ios) {
-          alert("กรุณาใส่ลิงก์อย่างน้อย 1 ระบบ");
-          return;
-        }
+      const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
+      const qrUrl = `${baseUrl}?android=${encodeURIComponent(android)}&ios=${encodeURIComponent(ios)}`;
 
-        const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
-        const qrUrl = `${baseUrl}?android=${encodeURIComponent(android)}&ios=${encodeURIComponent(ios)}`;
-
-        qrContainer.innerHTML = "";
-        new QRCode(qrContainer, {
-          text: qrUrl,
-          width: 160,
-          height: 160,
-          colorDark: "#000000",
-          colorLight: "#ffffff",
-          correctLevel: QRCode.CorrectLevel.H
-        });
-
-        console.log("QR สร้างจาก:", qrUrl);
+      qrContainer.innerHTML = "";
+      new QRCode(qrContainer, {
+        text: qrUrl,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
       });
-    };
-    document.head.appendChild(script);
-  </script>
+
+      console.log("QR สร้างจาก:", qrUrl);
+    });
+  };
+  document.head.appendChild(script);
+</script>
 </body>
 </html>
