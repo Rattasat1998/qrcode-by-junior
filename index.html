@@ -3,76 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>สร้าง QR ดาวน์โหลดแอป</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body { font-family: 'Inter', sans-serif; }
-  </style>
-</head>
-<body class="bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full text-center">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">แชร์ลิงก์ดาวน์โหลดแอป</h1>
-    <p class="text-gray-600 mb-4">สแกน QR เพื่อไปยัง Store ตามระบบ</p>
+  <title>Redirecting to App Store</title>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const android = params.get('android');
+    const ios = params.get('ios');
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
 
-    <div class="space-y-4 mb-6 text-left">
-      <div>
-        <label for="androidLink" class="block text-sm font-medium text-gray-700 mb-1">Android Link</label>
-        <input id="androidLink" type="url" placeholder="https://play.google.com/store/apps/details?id=com.example"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400" />
-      </div>
-      <div>
-        <label for="iosLink" class="block text-sm font-medium text-gray-700 mb-1">iOS Link</label>
-        <input id="iosLink" type="url" placeholder="https://apps.apple.com/app/id123456789"
-          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400" />
-      </div>
-      <button id="generateBtn" disabled
-        class="w-full bg-gray-300 text-white py-2 rounded-lg font-semibold cursor-not-allowed" title="กำลังโหลด...">
-        โหลด QRCode...
-      </button>
-    </div>
-
-    <div id="qrcode" class="flex justify-center mb-4"></div>
-
-    <p class="text-xs text-gray-500">QR นี้จะนำผู้ใช้ไปยัง Store ตามอุปกรณ์</p>
-  </div>
-<!-- JS: โหลด QRCode.js จาก jsDelivr แทน -->
-<script>
-  const script = document.createElement('script');
-  script.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
-  script.onload = function () {
-    const btn = document.getElementById('generateBtn');
-    btn.disabled = false;
-    btn.classList.remove('bg-gray-300', 'cursor-not-allowed');
-    btn.classList.add('bg-blue-500', 'hover:bg-blue-600');
-    btn.textContent = 'สร้าง QR Code';
-
-    btn.addEventListener('click', () => {
-      const android = document.getElementById('androidLink').value.trim();
-      const ios = document.getElementById('iosLink').value.trim();
-      const qrContainer = document.getElementById('qrcode');
-
-      if (!android && !ios) {
-        alert("กรุณาใส่ลิงก์อย่างน้อย 1 ระบบ");
-        return;
-      }
-
-      const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
-      const qrUrl = `${baseUrl}?android=${encodeURIComponent(android)}&ios=${encodeURIComponent(ios)}`;
-
-      qrContainer.innerHTML = "";
-      new QRCode(qrContainer, {
-        text: qrUrl,
-        width: 160,
-        height: 160,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
+    if (/android/i.test(ua) && android) {
+      window.location.href = android;
+    } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream && ios) {
+      window.location.href = ios;
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('androidLink').href = android || '#';
+        document.getElementById('iosLink').href = ios || '#';
+        document.getElementById('fallback').style.display = 'block';
       });
-
-      console.log("QR สร้างจาก:", qrUrl);
-    });
-  };
-  document.head.appendChild(script);
-</script>
+    }
+  </script>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding: 2rem;">
+  <h2>กำลังเปลี่ยนเส้นทาง...</h2>
+  <p>หากยังไม่เปลี่ยน โปรดคลิกลิงก์ด้านล่าง:</p>
+  <div id="fallback" style="display:none; margin-top: 1rem;">
+    <a id="androidLink" href="#" style="display: block; margin: 0.5rem 0;">🔗 ไปยัง Google Play</a>
+    <a id="iosLink" href="#" style="display: block; margin: 0.5rem 0;">🔗 ไปยัง App Store</a>
+  </div>
 </body>
 </html>
