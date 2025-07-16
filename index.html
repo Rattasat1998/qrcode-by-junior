@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart QR App Link</title>
+  <title>สร้าง QR ดาวน์โหลดแอป</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -12,7 +12,7 @@
 <body class="bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
   <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full text-center">
     <h1 class="text-2xl font-bold text-gray-800 mb-4">แชร์ลิงก์ดาวน์โหลดแอป</h1>
-    <p class="text-gray-600 mb-4">สแกน QR Code เพื่อเปิด Store ตามระบบ</p>
+    <p class="text-gray-600 mb-4">สแกน QR เพื่อไปยัง Store ตามระบบ</p>
 
     <div class="space-y-4 mb-6 text-left">
       <div>
@@ -31,13 +31,15 @@
 
     <div id="qrcode" class="flex justify-center mb-4"></div>
 
-    <p class="text-xs text-gray-500">QR นี้จะนำผู้ใช้ไปยัง Store ตามระบบ</p>
+    <p class="text-xs text-gray-500">QR นี้จะนำผู้ใช้ไปยัง Store ตามอุปกรณ์</p>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js" defer onload="init()"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js"></script>
 
+  <!-- Main Script -->
   <script>
-    function init() {
+    window.addEventListener('load', function () {
       const generateBtn = document.getElementById('generateBtn');
       const qrContainer = document.getElementById('qrcode');
 
@@ -50,14 +52,19 @@
           return;
         }
 
-        // Clear previous QR
+        // Clear QR
         qrContainer.innerHTML = "";
 
-        // Build smart link URL
+        // สร้างลิงก์ QR (ชี้กลับมาหน้านี้พร้อมพารามิเตอร์)
         const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
         const qrUrl = `${baseUrl}?android=${encodeURIComponent(android)}&ios=${encodeURIComponent(ios)}`;
 
-        // Generate QR code
+        // ตรวจสอบว่า QRCode พร้อมไหม
+        if (typeof QRCode === "undefined") {
+          alert("QRCode library ยังโหลดไม่เสร็จ กรุณาลองใหม่อีกครั้ง");
+          return;
+        }
+
         new QRCode(qrContainer, {
           text: qrUrl,
           width: 160,
@@ -67,10 +74,9 @@
           correctLevel: QRCode.CorrectLevel.H
         });
 
-        // Optional: copy URL to clipboard or show
         console.log("QR URL =", qrUrl);
       });
-    }
+    });
   </script>
 </body>
 </html>
