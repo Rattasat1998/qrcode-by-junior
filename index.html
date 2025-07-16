@@ -3,81 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart App Redirect</title>
+  <title>Smart QR App Link</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
+    body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
 <body class="bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">
-      กำลังนำทางคุณไปยัง Store...
-    </h1>
-    <p class="text-gray-600 mb-6">
-      หากคุณไม่ถูกเปลี่ยนเส้นทางโดยอัตโนมัติ โปรดคลิกปุ่มด้านล่าง หรือสแกน QR Code
-    </p>
+  <div class="bg-white p-6 rounded-xl shadow-2xl max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">แชร์ลิงก์ดาวน์โหลดแอป</h1>
+    <p class="text-gray-600 mb-4">สแกน QR Code เพื่อเปิด Store ตามระบบ</p>
 
-    <!-- QR Code Container -->
-    <div id="qrcode" class="flex justify-center mb-6 p-4 bg-gray-100 rounded-lg"></div>
-
-    <!-- Fallback Links -->
-    <div class="space-y-4">
-      <a id="androidLink" href="#" target="_blank"
-        class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 w-full">
-        ไปที่ Google Play Store
-      </a>
-      <a id="iosLink" href="#" target="_blank"
-        class="inline-flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 w-full">
-        ไปที่ Apple App Store
-      </a>
+    <div class="space-y-4 mb-6 text-left">
+      <div>
+        <label for="androidLink" class="block text-sm font-medium text-gray-700 mb-1">Android Link</label>
+        <input id="androidLink" type="url" placeholder="https://play.google.com/store/apps/details?id=com.example.app"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400" />
+      </div>
+      <div>
+        <label for="iosLink" class="block text-sm font-medium text-gray-700 mb-1">iOS Link</label>
+        <input id="iosLink" type="url" placeholder="https://apps.apple.com/app/id123456789"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-400" />
+      </div>
+      <button id="generateBtn"
+        class="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition">สร้าง QR Code</button>
     </div>
 
-    <p class="text-xs text-gray-500 mt-6">
-      URL ถูกโหลดผ่าน Query String
-    </p>
+    <div id="qrcode" class="flex justify-center mb-4"></div>
+
+    <p class="text-xs text-gray-500">QR นี้จะนำผู้ใช้ไปยัง Store ตามระบบ</p>
   </div>
 
-  <!-- QRCode.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js" defer onload="main()"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js" defer onload="init()"></script>
 
-  <!-- Main Script -->
   <script>
-    function main() {
-      const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    function init() {
+      const generateBtn = document.getElementById('generateBtn');
+      const qrContainer = document.getElementById('qrcode');
 
-      const params = new URLSearchParams(window.location.search);
-      const androidUrl = params.get("android") || "";
-      const iosUrl = params.get("ios") || "";
+      generateBtn.addEventListener('click', () => {
+        const android = document.getElementById('androidLink').value.trim();
+        const ios = document.getElementById('iosLink').value.trim();
 
-      const androidLink = document.getElementById("androidLink");
-      const iosLink = document.getElementById("iosLink");
+        if (!android && !ios) {
+          alert("กรุณาใส่ลิงก์อย่างน้อย 1 ระบบ");
+          return;
+        }
 
-      // Set href
-      androidLink.href = androidUrl || "#";
-      iosLink.href = iosUrl || "#";
+        // Clear previous QR
+        qrContainer.innerHTML = "";
 
-      // QR Code = current page URL (with params)
-      const qrContainer = document.getElementById("qrcode");
-      if (typeof QRCode !== "undefined") {
+        // Build smart link URL
+        const baseUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, '');
+        const qrUrl = `${baseUrl}?android=${encodeURIComponent(android)}&ios=${encodeURIComponent(ios)}`;
+
+        // Generate QR code
         new QRCode(qrContainer, {
-          text: window.location.href,
-          width: 128,
-          height: 128,
-          colorDark: "#000",
-          colorLight: "#fff",
-          correctLevel: QRCode.CorrectLevel.H,
+          text: qrUrl,
+          width: 160,
+          height: 160,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.H
         });
-      }
 
-      // Auto Redirect
-      if (/android/i.test(userAgent) && androidUrl) {
-        window.location.href = androidUrl;
-      } else if (/iPad|iPhone|iPod/.test(userAgent) && iosUrl && !window.MSStream) {
-        window.location.href = iosUrl;
-      }
+        // Optional: copy URL to clipboard or show
+        console.log("QR URL =", qrUrl);
+      });
     }
   </script>
 </body>
