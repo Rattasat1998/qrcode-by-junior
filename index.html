@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart App Link</title>
-  <!-- Tailwind CSS CDN -->
+  <title>Smart App Redirect</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -13,129 +12,72 @@
   </style>
 </head>
 <body class="bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
-  <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center transform transition-all duration-300 hover:scale-105">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">
+  <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">
       กำลังนำทางคุณไปยัง Store...
     </h1>
     <p class="text-gray-600 mb-6">
-      หากคุณไม่ถูกเปลี่ยนเส้นทางโดยอัตโนมัติ โปรดคลิกปุ่มด้านล่าง หรือสแกน QR Code นี้
+      หากคุณไม่ถูกเปลี่ยนเส้นทางโดยอัตโนมัติ โปรดคลิกปุ่มด้านล่าง หรือสแกน QR Code
     </p>
 
     <!-- QR Code Container -->
     <div id="qrcode" class="flex justify-center mb-6 p-4 bg-gray-100 rounded-lg"></div>
 
-    <!-- Input fields -->
-    <div class="space-y-4 mb-6 text-left">
-      <div>
-        <label for="androidLinkInput" class="block text-sm font-medium text-gray-700 mb-1">Android App Link:</label>
-        <input type="url" id="androidLinkInput" placeholder="https://play.google.com/store/apps/details?id=..."
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
-      </div>
-      <div>
-        <label for="iosLinkInput" class="block text-sm font-medium text-gray-700 mb-1">iOS App Link:</label>
-        <input type="url" id="iosLinkInput" placeholder="https://apps.apple.com/us/app/..."
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"/>
-      </div>
-      <button id="saveLinksBtn"
-        class="w-full inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
-        บันทึกลิงก์และสร้าง QR Code ใหม่
-      </button>
-    </div>
-
-    <!-- Fallback links -->
+    <!-- Fallback Links -->
     <div class="space-y-4">
-      <a id="androidLink" href="#"
-        class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 w-full">
-        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M7 2v20h10V2H7zm2 2h6v1H9V4zm0 16h6v1H9v-1zM5 0h14a2 2 0 012 2v20a2 2 0 01-2 2H5a2 2 0 01-2-2V2a2 2 0 012-2zm2 2v20h10V2H7zm2 2h6v1H9V4zm0 16h6v1H9v-1z"></path>
-        </svg>
+      <a id="androidLink" href="#" target="_blank"
+        class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 w-full">
         ไปที่ Google Play Store
       </a>
-      <a id="iosLink" href="#"
-        class="inline-flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 w-full">
-        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 2c3.313 0 6 2.687 6 6s-2.687 6-6 6-6-2.687-6-6 2.687-6 6-6zm0 2a4 4 0 100 8 4 4 0 000-8z"></path>
-        </svg>
+      <a id="iosLink" href="#" target="_blank"
+        class="inline-flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 w-full">
         ไปที่ Apple App Store
       </a>
     </div>
 
     <p class="text-xs text-gray-500 mt-6">
-      ลิงก์ที่ป้อนจะถูกบันทึกในเบราว์เซอร์ของคุณ
+      URL ถูกโหลดผ่าน Query String
     </p>
   </div>
 
-  <!-- QRCode library (loaded with defer and triggers main) -->
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js" defer onload="main()"></script>
 
   <!-- Main Script -->
   <script>
     function main() {
       const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-      const androidLinkInput = document.getElementById('androidLinkInput');
-      const iosLinkInput = document.getElementById('iosLinkInput');
-      const saveLinksBtn = document.getElementById('saveLinksBtn');
-      const androidLinkElement = document.getElementById('androidLink');
-      const iosLinkElement = document.getElementById('iosLink');
 
-      function loadLinks() {
-        const savedAndroidLink = localStorage.getItem('androidAppStoreUrl');
-        const savedIosLink = localStorage.getItem('iosAppStoreUrl');
-        androidLinkInput.value = savedAndroidLink || "https://play.google.com/store/apps/details?id=com.example.androidapp";
-        iosLinkInput.value = savedIosLink || "https://apps.apple.com/us/app/example-app/id1234567890";
+      const params = new URLSearchParams(window.location.search);
+      const androidUrl = params.get("android") || "";
+      const iosUrl = params.get("ios") || "";
+
+      const androidLink = document.getElementById("androidLink");
+      const iosLink = document.getElementById("iosLink");
+
+      // Set href
+      androidLink.href = androidUrl || "#";
+      iosLink.href = iosUrl || "#";
+
+      // QR Code = current page URL (with params)
+      const qrContainer = document.getElementById("qrcode");
+      if (typeof QRCode !== "undefined") {
+        new QRCode(qrContainer, {
+          text: window.location.href,
+          width: 128,
+          height: 128,
+          colorDark: "#000",
+          colorLight: "#fff",
+          correctLevel: QRCode.CorrectLevel.H,
+        });
       }
 
-      function saveLinks() {
-        const androidUrl = androidLinkInput.value.trim();
-        const iosUrl = iosLinkInput.value.trim();
-        androidUrl ? localStorage.setItem('androidAppStoreUrl', androidUrl) : localStorage.removeItem('androidAppStoreUrl');
-        iosUrl ? localStorage.setItem('iosAppStoreUrl', iosUrl) : localStorage.removeItem('iosAppStoreUrl');
-        androidLinkElement.href = androidUrl || "#";
-        iosLinkElement.href = iosUrl || "#";
-        redirectToStore();
-        generateQRCode();
+      // Auto Redirect
+      if (/android/i.test(userAgent) && androidUrl) {
+        window.location.href = androidUrl;
+      } else if (/iPad|iPhone|iPod/.test(userAgent) && iosUrl && !window.MSStream) {
+        window.location.href = iosUrl;
       }
-
-      function redirectToStore() {
-        const androidAppStoreUrl = androidLinkInput.value.trim();
-        const iosAppStoreUrl = iosLinkInput.value.trim();
-        if (/android/i.test(userAgent) && androidAppStoreUrl) {
-          window.location.href = androidAppStoreUrl;
-        } else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream && iosAppStoreUrl) {
-          window.location.href = iosAppStoreUrl;
-        }
-      }
-
-      function generateQRCode() {
-        document.getElementById("qrcode").innerHTML = "";
-        const qrCodeData = window.location.href;
-        if (typeof QRCode !== 'undefined') {
-          new QRCode(document.getElementById("qrcode"), {
-            text: qrCodeData,
-            width: 128,
-            height: 128,
-            colorDark: "#000000",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.H
-          });
-        } else {
-          console.error("QRCode library not loaded yet.");
-        }
-      }
-
-      loadLinks();
-      saveLinks();
-      saveLinksBtn.addEventListener('click', saveLinks);
-      androidLinkElement.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = androidLinkInput.value.trim();
-        if (url) window.location.href = url;
-      });
-      iosLinkElement.addEventListener('click', (e) => {
-        e.preventDefault();
-        const url = iosLinkInput.value.trim();
-        if (url) window.location.href = url;
-      });
     }
   </script>
 </body>
