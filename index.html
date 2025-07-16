@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart App Link</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom font for a modern look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center transform transition-all duration-300 hover:scale-105">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">
+            กำลังนำทางคุณไปยัง Store...
+        </h1>
+        <p class="text-gray-600 mb-6">
+            หากคุณไม่ถูกเปลี่ยนเส้นทางโดยอัตโนมัติ โปรดคลิกปุ่มด้านล่าง หรือสแกน QR Code นี้
+        </p>
+
+        <!-- QR Code Container -->
+        <div id="qrcode" class="flex justify-center mb-6 p-4 bg-gray-100 rounded-lg"></div>
+
+        <!-- Input fields for app links -->
+        <div class="space-y-4 mb-6 text-left">
+            <div>
+                <label for="androidLinkInput" class="block text-sm font-medium text-gray-700 mb-1">Android App Link:</label>
+                <input type="url" id="androidLinkInput" placeholder="https://play.google.com/store/apps/details?id=..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="iosLinkInput" class="block text-sm font-medium text-gray-700 mb-1">iOS App Link:</label>
+                <input type="url" id="iosLinkInput" placeholder="https://apps.apple.com/us/app/..."
+                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+            </div>
+            <button id="saveLinksBtn"
+                    class="w-full inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-colors duration-300">
+                บันทึกลิงก์และสร้าง QR Code ใหม่
+            </button>
+        </div>
+
+        <!-- Fallback links for manual redirection -->
+        <div class="space-y-4">
+            <a id="androidLink" href="#"
+               class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 w-full">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M7 2v20h10V2H7zm2 2h6v1H9V4zm0 16h6v1H9v-1zM5 0h14a2 2 0 012 2v20a2 2 0 01-2 2H5a2 2 0 01-2-2V2a2 2 0 012-2zm2 2v20h10V2H7zm2 2h6v1H9V4zm0 16h6v1H9v-1z"></path>
+                </svg>
+                ไปที่ Google Play Store
+            </a>
+            <a id="iosLink" href="#"
+               class="inline-flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition-colors duration-300 w-full">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 2c3.313 0 6 2.687 6 6s-2.687 6-6 6-6-2.687-6-6 2.687-6 6-6zm0 2a4 4 0 100 8 4 4 0 000-8z"></path>
+                </svg>
+                ไปที่ Apple App Store
+            </a>
+        </div>
+
+        <p class="text-xs text-gray-500 mt-6">
+            ลิงก์ที่ป้อนจะถูกบันทึกในเบราว์เซอร์ของคุณ
+        </p>
+    </div>
+
+    <!-- qrcode.js CDN for QR code generation - Moved here to ensure it loads before our script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        // Get the user agent string to detect the OS
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+
+        // Get input fields and buttons
+        const androidLinkInput = document.getElementById('androidLinkInput');
+        const iosLinkInput = document.getElementById('iosLinkInput');
+        const saveLinksBtn = document.getElementById('saveLinksBtn');
+
+        // Get the fallback links
+        const androidLinkElement = document.getElementById('androidLink');
+        const iosLinkElement = document.getElementById('iosLink');
+
+        // Function to load links from localStorage
+        function loadLinks() {
+            const savedAndroidLink = localStorage.getItem('androidAppStoreUrl');
+            const savedIosLink = localStorage.getItem('iosAppStoreUrl');
+
+            if (savedAndroidLink) {
+                androidLinkInput.value = savedAndroidLink;
+            } else {
+                // Default placeholder if nothing saved
+                androidLinkInput.value = "https://play.google.com/store/apps/details?id=com.example.androidapp";
+            }
+
+            if (savedIosLink) {
+                iosLinkInput.value = savedIosLink;
+            } else {
+                // Default placeholder if nothing saved
+                iosLinkInput.value = "https://apps.apple.com/us/app/example-app/id1234567890";
+            }
+        }
+
+        // Function to save links to localStorage
+        function saveLinks() {
+            const androidUrl = androidLinkInput.value.trim();
+            const iosUrl = iosLinkInput.value.trim();
+
+            if (androidUrl) {
+                localStorage.setItem('androidAppStoreUrl', androidUrl);
+            } else {
+                localStorage.removeItem('androidAppStoreUrl');
+            }
+
+            if (iosUrl) {
+                localStorage.setItem('iosAppStoreUrl', iosUrl);
+            } else {
+                localStorage.removeItem('iosAppStoreUrl');
+            }
+
+            // Update fallback links' href attributes
+            androidLinkElement.href = androidUrl || "#";
+            iosLinkElement.href = iosUrl || "#";
+
+            // Re-run redirect and QR code generation with new links
+            redirectToStore();
+            generateQRCode();
+        }
+
+        // Function to redirect
+        function redirectToStore() {
+            const androidAppStoreUrl = androidLinkInput.value.trim();
+            const iosAppStoreUrl = iosLinkInput.value.trim();
+
+            if (!androidAppStoreUrl && !iosAppStoreUrl) {
+                console.warn("No app store URLs configured. Please enter them in the fields above.");
+                return; // Do not attempt redirect if no URLs are set
+            }
+
+            // Check if it's an Android device and Android URL is available
+            if (/android/i.test(userAgent) && androidAppStoreUrl) {
+                window.location.href = androidAppStoreUrl;
+            }
+            // Check if it's an iOS device (iPhone, iPad, iPod) and iOS URL is available
+            else if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream && iosAppStoreUrl) {
+                window.location.href = iosAppStoreUrl;
+            }
+            // If neither, or if on desktop, do not auto-redirect, let user use buttons
+            else {
+                // You can add a message here for desktop users if needed
+            }
+        }
+
+        // Function to generate QR code
+        function generateQRCode() {
+            // Clear previous QR code
+            document.getElementById("qrcode").innerHTML = "";
+
+            // The QR code will always point to the current page URL (this smart link page)
+            // This ensures that when the QR code is scanned, it lands back on this page
+            // which then handles the automatic redirection based on the device.
+            let qrCodeData = window.location.href;
+
+            // Ensure QRCode is defined before using it
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(document.getElementById("qrcode"), {
+                    text: qrCodeData,
+                    width: 128,
+                    height: 128,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H // High error correction
+                });
+            } else {
+                console.error("QRCode library not loaded yet.");
+            }
+        }
+
+        // Initialize on page load
+        window.onload = () => {
+            loadLinks(); // Load saved links first
+            saveLinks(); // Apply loaded links and perform initial redirect/QR generation
+        };
+
+        // Add event listener to the save button
+        saveLinksBtn.addEventListener('click', saveLinks);
+
+        // Add event listeners to the fallback links to ensure they work
+        androidLinkElement.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            const androidUrl = androidLinkInput.value.trim();
+            if (androidUrl) {
+                window.location.href = androidUrl;
+            } else {
+                console.warn("Android app link is not set.");
+            }
+        });
+
+        iosLinkElement.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            const iosUrl = iosLinkInput.value.trim();
+            if (iosUrl) {
+                window.location.href = iosUrl;
+            } else {
+                console.warn("iOS app link is not set.");
+            }
+        });
+    </script>
+</body>
+</html>
